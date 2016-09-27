@@ -23,6 +23,7 @@
   "author": "jasonHzq",
   "license": "ISC",
   "dependencies": {
+    "lodash": "^4.16.2",
     "redux-saga": "^0.11.1"
   }
 }

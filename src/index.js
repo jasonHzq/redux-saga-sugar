@@ -1,5 +1,7 @@
 import { fork, call, put, take, select } from 'redux-saga/effects';
 import { takeEvery, takeLatest } from 'redux-saga';
+import get from 'lodash/get';
+import mapValues from 'lodash/mapValues';
 
 function createAction(firstArg) {
   let actionCreator = null;
@@ -65,13 +67,13 @@ function createActions(actions) {
     throw new Error('createActions params actions should be an object');
   }
 
-  return _.mapValues(actions, createAction);
+  return mapValues(actions, createAction);
 }
 
 
 function selectGet(path) {
   return select(state => {
-    return _.get(state, path);
+    return get(state, path);
   });
 }
 
