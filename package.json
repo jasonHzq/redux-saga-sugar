@@ -22,6 +22,13 @@
   ],
   "author": "jasonHzq",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasonHzq/redux-saga-sugar/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonHzq/redux-saga-sugar.git"
+  },
   "dependencies": {
     "babel-polyfill": "^6.13.0",
     "lodash": "^4.16.2",

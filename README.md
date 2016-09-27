@@ -3,7 +3,8 @@
 redux-saga utilities.
 
 [![npm version](https://badge.fury.io/js/redux-saga-sugar.png)](https://badge.fury.io/js/redux-saga-sugar)
-[![npm downloads](https://img.shields.io/npm/dt/redux-saga-sugar.svg?style=flat-square)](https://www.npmjs.com/package/redux-saga-sugar)
+[![build status](https://travis-ci.org/jasonHzq/redux-saga-sugar.svg)](https://travis-ci.org/jasonHzq/redux-saga-sugar)
+[![npm downloads](https://img.shields.io/npm/dt/redux-saga-sugar.svg?style=flat-square)](https://www.npmjs.com/package/rredux-saga-sugar)
 
 ## Getting started
 
