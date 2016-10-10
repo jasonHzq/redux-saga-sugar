@@ -24,7 +24,7 @@ function createAction(firstArg) {
   } else if (typeof firstArg === 'object') {
     const fetchObj = firstArg;
 
-    const { url, params: objParams = {}, types, ...others } = fetchObj;
+    const { url, params: objParams = {}, meta: objMeta, types, ...others } = fetchObj;
 
     if (url) {
       const fetchType = '@@saga/SAGA_FETCH';
@@ -33,7 +33,10 @@ function createAction(firstArg) {
           type: fetchType,
           types,
           url,
-          meta,
+          meta: {
+            ...objMeta,
+            ...meta,
+          },
           params: {
             ...objParams,
             ...params,
@@ -44,6 +47,24 @@ function createAction(firstArg) {
 
       actionCreator.toString = () => {
         return fetchType;
+      };
+    } else if (fetchObj.pollingUrl) {
+      actionCreator = (params = {}, meta) => {
+        return {
+          ...fetchObj,
+          params: {
+            ...objParams,
+            ...params,
+          },
+          meta: {
+            ...objMeta,
+            ...meta,
+          },
+        };
+      };
+
+      actionCreator.toString = () => {
+        return fetchObj.type;
       };
     } else if (firstArg.type) {
       actionCreator = () => {
