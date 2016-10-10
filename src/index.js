@@ -143,6 +143,39 @@ export default function createSugar(Request) {
     return call(putFetchActionsGenerator, fetchAction);
   }
 
+  function* pollingSaga(fetchAction) {
+    const { defaultInterval } = fetchAction;
+
+    while (true) {
+      const result = yield Sugar.putFetch(fetchAction);
+
+      if (result.error) {
+        yield delay(defaultInterval);
+        continue;
+      }
+
+      const { payload: { interval } } = result;
+      yield delay(interval);
+    }
+  }
+
+  function* beginPolling(pollingAction) {
+    const { pollingUrl, defaultInterval = 300, type, params = {} } = pollingAction;
+
+    const fetchAction = {
+      url: pollingUrl,
+      types: [null, type],
+      params,
+      defaultInterval,
+    };
+
+    const pollingTaskId = yield fork(pollingSaga, fetchAction);
+
+    yield createWatchGenerator(type, function* () {
+      yield cancel(pollingTaskId);
+    });
+  }
+
   return {
     get: selectGet,
     createWatch: createWatchGenerator,
@@ -154,6 +187,13 @@ export default function createSugar(Request) {
 
         return url && types && types.length;
       }, putFetchActionsGenerator);
+    },
+    pollingSagaMiddleware: function* () {
+      yield takeEvery(action => {
+        const { pollingUrl, type } = action;
+
+        return pollingUrl && type;
+      }, beginPolling);
     },
     createActions,
     createAction,
