@@ -170,8 +170,9 @@ export default function createSugar(Request) {
     };
 
     const pollingTaskId = yield fork(pollingSaga, fetchAction);
+    const pattern = action => action.type === type && action.stopPolling;
 
-    yield createWatchGenerator(type, function* () {
+    yield createWatchGenerator(pattern, function* () {
       yield cancel(pollingTaskId);
     });
   }
