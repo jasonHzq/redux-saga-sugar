@@ -75,10 +75,10 @@ function createAction(firstArg) {
         return firstArg.type;
       };
     } else {
-      throw new Error('createAction params error!');
+      throw new Error('createAction params error! unexpect action: ', firstArg);
     }
   } else {
-    throw new Error('createAction params error!');
+    throw new Error('createAction params error! unexpect action: ', firstArg);
   }
 
   return actionCreator;
@@ -86,7 +86,7 @@ function createAction(firstArg) {
 
 function createActions(actions) {
   if (typeof actions !== 'object') {
-    throw new Error('createActions params actions should be an object');
+    throw new Error('createActions params actions should be an object, but received ', actions);
   }
 
   return mapValues(actions, createAction);
@@ -181,17 +181,21 @@ export default function createSugar(Request) {
   }
 
   function* beginPolling(pollingAction) {
-    const { pollingUrl, defaultInterval = 300, type, params = {} } = pollingAction;
+    const { pollingUrl, defaultInterval = 300, types, params = {} } = pollingAction;
+
+    if (!types[1]) {
+      throw Error('pollingAction types[1] is null', pollingAction);
+    }
 
     const fetchAction = {
       url: pollingUrl,
-      types: [null, type],
+      types,
       params,
       defaultInterval,
     };
 
     const pollingTaskId = yield fork(pollingSaga, fetchAction);
-    const pattern = action => action.type === type && action.stopPolling;
+    const pattern = action => action.type === types[1] && action.stopPolling;
 
     yield createWatchGenerator(pattern, function* () {
       yield cancel(pollingTaskId);
@@ -212,9 +216,9 @@ export default function createSugar(Request) {
     },
     pollingSagaMiddleware: function* () {
       yield takeEvery(action => {
-        const { pollingUrl, type } = action;
+        const { pollingUrl, types } = action;
 
-        return pollingUrl && type;
+        return pollingUrl && types && types.length;
       }, beginPolling);
     },
     createActions,
