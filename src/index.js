@@ -128,7 +128,7 @@ function* beginPolling(pollingAction) {
   });
 }
 
-export const Sugar = {
+const Sugar = {
   get: selectGet,
   createWatch: createWatchGenerator,
   createWatchLatest: createWatchLatestGenerator,
@@ -142,3 +142,5 @@ export const Sugar = {
   createActions,
   createAction,
 };
+
+export default Sugar;
