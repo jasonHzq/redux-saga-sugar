@@ -47,6 +47,34 @@ export default Sugar;
 export function* rootSaga() {
   yield fork(Sugar.fetchSagaMiddleware);
 }
+
+const actions = Sugar.createActions({
+  loadData: {
+    url: Urlmap.loadData,
+    types: [load, success, failure],
+  },
+});
+```
+
+### pollingSagaMiddleware
+
+实时中间件
+
+```js
+export function* rootSaga() {
+  yield fork(Sugar.pollingSagaMiddleware);
+}
+
+const actions = Sugar.createActions({
+  beginPolling: {
+    pollingUrl: Urlmap.polling,
+    types: [load, pollingSuccess, failure],
+  },
+  stopPolling: {
+    type: pollingSuccess,
+    stopPolling: true,
+  },
+});
 ```
 
 ### createActions / createAction
