@@ -24,47 +24,28 @@ function createAction(firstArg) {
   } else if (typeof firstArg === 'object') {
     const fetchObj = firstArg;
 
-    const { url, params: objParams = {}, meta: objMeta, types, ...others } = fetchObj;
+    const {
+      url, pollingUrl, params: objParams = {}, meta: objMeta,
+      type, types, ...others,
+    } = fetchObj;
 
-    if (url) {
-      const fetchType = '@@saga/SAGA_FETCH';
-      actionCreator = (params = {}, meta) => {
-        return {
-          type: fetchType,
-          types,
-          url,
-          meta: {
-            ...objMeta,
-            ...meta,
-          },
-          params: {
-            ...objParams,
-            ...params,
-          },
-          ...others,
-        };
-      };
-
-      actionCreator.toString = () => {
-        return fetchType;
-      };
-    } else if (fetchObj.pollingUrl) {
+    if (url || pollingUrl) {
       actionCreator = (params = {}, meta) => {
         return {
           ...fetchObj,
-          params: {
-            ...objParams,
-            ...params,
-          },
           meta: {
             ...objMeta,
             ...meta,
+          },
+          params: {
+            ...objParams,
+            ...params,
           },
         };
       };
 
       actionCreator.toString = () => {
-        return fetchObj.type;
+        return type;
       };
     } else if (firstArg.type) {
       actionCreator = () => {
@@ -111,117 +92,53 @@ function createWatchLatestGenerator(pattern, saga, ...args) {
   });
 }
 
-export default function createSugar(Request) {
-  // 监听 fetch action，可以看成是 redux-saga 中的 fetch 中间件
-  function* putFetchActionsGenerator(action) {
-    const { params, url, types, method = 'GET' } = action;
-    const meta = { url, params, method };
-    const [loadType, successType, failureType] = types;
+function* pollingSaga(fetchAction) {
+  const { defaultInterval } = fetchAction;
 
-    if (loadType) {
-      yield put({
-        type: loadType,
-        meta,
-        payload: null,
-      });
-    }
-
+  while (true) {
     try {
-      const payload = yield call(Request, { url, params, method });
-      const successAction = {
-        type: successType,
-        meta,
-        payload,
-      };
-
-      yield put(successAction);
-
-      return successAction;
-    } catch (e) {
-      console.error(e, e.stack);
-
-      let failureAction = {
-        meta,
-        payload: e,
-        reason: e.reason || '未知异常！',
-        error: true,
-      };
-
-      if (failureType) {
-        failureAction = {
-          ...failureAction,
-          type: failureType,
-        };
-
-        yield put(failureAction);
-      }
-
-      return failureAction;
-    }
-  }
-
-  function putFetch(fetchAction) {
-    return call(putFetchActionsGenerator, fetchAction);
-  }
-
-  function* pollingSaga(fetchAction) {
-    const { defaultInterval } = fetchAction;
-
-    while (true) {
-      const result = yield Sugar.putFetch(fetchAction);
-
-      if (result.error) {
-        yield delay(defaultInterval);
-        continue;
-      }
-
+      const result = yield put.sync(fetchAction);
       const { payload: { interval } } = result;
       yield delay(interval);
+    } catch (e) {
+      yield delay(defaultInterval);
     }
   }
+}
 
-  function* beginPolling(pollingAction) {
-    const { pollingUrl, defaultInterval = 300, types, params = {} } = pollingAction;
+function* beginPolling(pollingAction) {
+  const { pollingUrl, defaultInterval = 300, types, params = {} } = pollingAction;
 
-    if (!types[1]) {
-      throw Error('pollingAction types[1] is null', pollingAction);
-    }
-
-    const fetchAction = {
-      url: pollingUrl,
-      types,
-      params,
-      defaultInterval,
-    };
-
-    const pollingTaskId = yield fork(pollingSaga, fetchAction);
-    const pattern = action => action.type === types[1] && action.stopPolling;
-
-    yield createWatchGenerator(pattern, function* () {
-      yield cancel(pollingTaskId);
-    });
+  if (!types[1]) {
+    throw Error('pollingAction types[1] is null', pollingAction);
   }
 
-  return {
-    get: selectGet,
-    createWatch: createWatchGenerator,
-    createWatchLatest: createWatchLatestGenerator,
-    putFetch,
-    fetchSagaMiddleware: function* () {
-      yield takeEvery(action => {
-        const { url, types } = action;
-
-        return url && types && types.length;
-      }, putFetchActionsGenerator);
-    },
-    pollingSagaMiddleware: function* () {
-      yield takeEvery(action => {
-        const { pollingUrl, types } = action;
-
-        return pollingUrl && types && types.length;
-      }, beginPolling);
-    },
-    createActions,
-    createAction,
+  const fetchAction = {
+    url: pollingUrl,
+    types,
+    params,
+    defaultInterval,
   };
+
+  const pollingTaskId = yield fork(pollingSaga, fetchAction);
+  const pattern = action => action.type === types[1] && action.stopPolling;
+
+  yield createWatchGenerator(pattern, function* () {
+    yield cancel(pollingTaskId);
+  });
+}
+
+export const Sugar = {
+  get: selectGet,
+  createWatch: createWatchGenerator,
+  createWatchLatest: createWatchLatestGenerator,
+  pollingSagaMiddleware: function* () {
+    yield takeEvery(action => {
+      const { pollingUrl, types } = action;
+
+      return pollingUrl && types && types.length;
+    }, beginPolling);
+  },
+  createActions,
+  createAction,
 };

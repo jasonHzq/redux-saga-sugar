@@ -14,47 +14,7 @@ redux-saga utilities.
 $ npm i -S redux-saga-sugar
 ```
 
-### Create Sugar
-
-每个项目都有自己不同的 fetch 方法，因此这里需要提供一个符合这种规范的 fetch 方法：
-
-```js
-fetch({ url, params, method }).then(data => {
-  console.log(data);
-}, err => {
-  console.log(err.reason);
-});
-```
-
-创建 Sugar:
-
-```js
-import createSugar from 'redux-saga-sugar';
-import fetch from './fetch';
-
-const Sugar = createSugar(fetch);
-
-export default Sugar;
-```
-
 ## Documentation
-
-### fetchSagaMiddleware
-
-用 redux-saga 实现的可以代替 fetch-middleware 的中间件
-
-```js
-export function* rootSaga() {
-  yield fork(Sugar.fetchSagaMiddleware);
-}
-
-const actions = Sugar.createActions({
-  loadData: {
-    url: Urlmap.loadData,
-    types: [load, success, failure],
-  },
-});
-```
 
 ### pollingSagaMiddleware
 
@@ -105,7 +65,7 @@ function() {
 ```
 
 ```js
-import Sugar from './Sugar';
+import Sugar from 'redux-saga-sugar';
 
 export const actions = Sugar.createActions({
   loadBasicData: {
@@ -163,28 +123,6 @@ yield select(state => {
 function* loadDataSaga() {
   const id = yield Sugar.get(`${currPath}.id`);
   yield put(actions.loadData({ id }));
-}
-```
-
-### putFetch
-
-如果用 `put` 的 `Effect` 去执行 `fetch action`， `yield` 并不会阻塞到异步接口请求结束，这个时候需要 `putFetch`
-
-```js
-function* loadDataSaga() {
-  const activeKey = yield Sugar.get(`${currPath}.activeKey`)
-
-  const result = yield Sugar.putFetch(actions.loadBasicData({ activeKey }));
-
-  if (result.error) {
-    Notify(result.reason);
-
-    return;
-  }
-
-  const { ids } = result;
-
-  yield put(actions.loadDataSaga);
 }
 ```
 
