@@ -29,7 +29,7 @@ function createAction(firstArg) {
       type, types, ...others,
     } = fetchObj;
 
-    if (url || pollingSUrl || pollingUrl) {
+    if (url || pollingUrl) {
       actionCreator = (params = {}, meta) => {
         return {
           ...fetchObj,
@@ -41,6 +41,25 @@ function createAction(firstArg) {
             ...objParams,
             ...params,
           },
+        };
+      };
+
+      actionCreator.toString = () => {
+        return type;
+      };
+    } else if (pollingSUrl) {
+      actionCreator = (params = {}, meta) => {
+        return {
+          ...fetchObj,
+          meta: {
+            ...objMeta,
+            ...meta,
+          },
+          params: {
+            ...objParams,
+            ...params,
+          },
+          type: `@saga/polling/${types[1]}`
         };
       };
 
@@ -102,9 +121,9 @@ function* pollingSaga(fetchAction) {
     try {
       const result = yield put.sync(fetchAction);
       const { payload: { interval } } = result;
-      yield delay(interval);
+      yield delay(interval * 1000);
     } catch (e) {
-      yield delay(defaultInterval);
+      yield delay(defaultInterval * 1000);
     }
   }
 }
