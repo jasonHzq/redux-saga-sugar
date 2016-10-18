@@ -117,14 +117,14 @@ function createWatchLatestGenerator(pattern, saga, ...args) {
 function* pollingSaga(fetchAction) {
   const { defaultInterval } = fetchAction;
 
-  while (true) {
-    try {
+  try {
+    while (true) {
       const result = yield put.sync(fetchAction);
       const { payload: { interval } } = result;
       yield delay(interval * 1000);
-    } catch (e) {
-      yield delay(defaultInterval * 1000);
     }
+  } catch (e) {
+    yield delay(defaultInterval * 1000);
   }
 }
 
@@ -145,9 +145,8 @@ function* beginPolling(pollingAction) {
   const pollingTaskId = yield fork(pollingSaga, fetchAction);
   const pattern = action => action.type === types[1] && action.stopPolling;
 
-  yield createWatchGenerator(pattern, function* () {
-    yield cancel(pollingTaskId);
-  });
+  yield take(pattern);
+  yield cancel(pollingTaskId);
 }
 
 const Sugar = {
