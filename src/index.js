@@ -25,11 +25,11 @@ function createAction(firstArg) {
     const fetchObj = firstArg;
 
     const {
-      url, pollingSUrl, params: objParams = {}, meta: objMeta,
+      url, pollingSUrl, pollingUrl, params: objParams = {}, meta: objMeta,
       type, types, ...others,
     } = fetchObj;
 
-    if (url || pollingSUrl) {
+    if (url || pollingSUrl || pollingUrl) {
       actionCreator = (params = {}, meta) => {
         return {
           ...fetchObj,
@@ -56,10 +56,12 @@ function createAction(firstArg) {
         return firstArg.type;
       };
     } else {
-      throw new Error('createAction params error! unexpect action: ', firstArg);
+      console.error('unexpect action: ', firstArg);
+      throw new Error('action has no type property! ');
     }
   } else {
-    throw new Error('createAction params error! unexpect action: ', firstArg);
+    console.error('unexpect action: ', firstArg);
+    throw new Error('createAction params error! ');
   }
 
   return actionCreator;
@@ -67,7 +69,8 @@ function createAction(firstArg) {
 
 function createActions(actions) {
   if (typeof actions !== 'object') {
-    throw new Error('createActions params actions should be an object, but received ', actions);
+    console.error('unexpect actions: ', actions);
+    throw new Error('createActions params actions should be an object');
   }
 
   return mapValues(actions, createAction);
