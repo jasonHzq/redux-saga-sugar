@@ -25,11 +25,11 @@ function createAction(firstArg) {
     const fetchObj = firstArg;
 
     const {
-      url, pollingUrl, params: objParams = {}, meta: objMeta,
+      url, pollingSUrl, params: objParams = {}, meta: objMeta,
       type, types, ...others,
     } = fetchObj;
 
-    if (url || pollingUrl) {
+    if (url || pollingSUrl) {
       actionCreator = (params = {}, meta) => {
         return {
           ...fetchObj,
@@ -107,14 +107,14 @@ function* pollingSaga(fetchAction) {
 }
 
 function* beginPolling(pollingAction) {
-  const { pollingUrl, defaultInterval = 300, types, params = {} } = pollingAction;
+  const { pollingSUrl, defaultInterval = 300, types, params = {} } = pollingAction;
 
   if (!types[1]) {
     throw Error('pollingAction types[1] is null', pollingAction);
   }
 
   const fetchAction = {
-    url: pollingUrl,
+    url: pollingSUrl,
     types,
     params,
     defaultInterval,
@@ -134,13 +134,14 @@ const Sugar = {
   createWatchLatest: createWatchLatestGenerator,
   pollingSagaMiddleware: function* () {
     yield takeEvery(action => {
-      const { pollingUrl, types } = action;
+      const { pollingSUrl, types } = action;
 
-      return pollingUrl && types && types.length;
+      return pollingSUrl && types && types.length;
     }, beginPolling);
   },
   createActions,
   createAction,
+  fetchSagaMiddleware
 };
 
 export default Sugar;

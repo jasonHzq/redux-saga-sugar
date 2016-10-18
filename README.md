@@ -27,7 +27,7 @@ export function* rootSaga() {
 
 const actions = Sugar.createActions({
   beginPolling: {
-    pollingUrl: Urlmap.polling,
+    pollingSUrl: Urlmap.polling,
     types: [load, pollingSuccess, failure],
   },
   stopPolling: {
