@@ -141,7 +141,6 @@ const Sugar = {
   },
   createActions,
   createAction,
-  fetchSagaMiddleware
 };
 
 export default Sugar;
