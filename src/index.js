@@ -120,10 +120,10 @@ function* pollingSaga(fetchAction) {
   try {
     while (true) {
       const result = yield put.sync(fetchAction);
-      const { payload: { interval } } = result;
+      const { interval } = result;
       yield delay(interval * 1000);
     }
-  } catch (e) {
+  } catch(e) {
     yield delay(defaultInterval * 1000);
   }
 }
@@ -154,11 +154,15 @@ const Sugar = {
   createWatch: createWatchGenerator,
   createWatchLatest: createWatchLatestGenerator,
   pollingSagaMiddleware: function* () {
-    yield takeEvery(action => {
-      const { pollingSUrl, types } = action;
+    try {
+      yield takeEvery(action => {
+        const { pollingSUrl, types } = action;
 
-      return pollingSUrl && types && types.length;
-    }, beginPolling);
+        return pollingSUrl && types && types.length;
+      }, beginPolling);
+    } catch (e) {
+      consle.err(e);
+    }
   },
   createActions,
   createAction,
