@@ -117,14 +117,14 @@ function createWatchLatestGenerator(pattern, saga, ...args) {
 function* pollingSaga(fetchAction) {
   const { defaultInterval } = fetchAction;
 
-  try {
-    while (true) {
+  while (true) {
+    try {
       const result = yield put.sync(fetchAction);
       const { interval } = result;
       yield delay(interval * 1000);
+    } catch (e) {
+      yield delay(defaultInterval * 1000);
     }
-  } catch(e) {
-    yield delay(defaultInterval * 1000);
   }
 }
 
