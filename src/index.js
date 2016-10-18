@@ -130,7 +130,7 @@ function* pollingSaga(fetchAction) {
 }
 
 function* beginPolling(pollingAction) {
-  const { pollingSUrl, defaultInterval = 300, types, params = {} } = pollingAction;
+  const { pollingSUrl, defaultInterval = 300, mockInterval, types, params = {} } = pollingAction;
 
   if (!types[1]) {
     throw Error('pollingAction types[1] is null', pollingAction);
@@ -140,6 +140,7 @@ function* beginPolling(pollingAction) {
     url: pollingSUrl,
     types,
     params,
+    mockInterval,
     defaultInterval,
   };
 
