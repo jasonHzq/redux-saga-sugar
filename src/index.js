@@ -115,22 +115,31 @@ function createWatchLatestGenerator(pattern, saga, ...args) {
 }
 
 function* pollingSaga(fetchAction) {
-  const { defaultInterval, mockInterval } = fetchAction;
+  const { defaultInterval, mockInterval, shouldStopFirst } = fetchAction;
+  let isFirstPolling = true;
 
   while (true) {
     try {
       const result = yield put.sync(fetchAction);
+      isFirstPolling = false;
       const interval = mockInterval || result.interval;
 
       yield delay(interval * 1000);
     } catch (e) {
+      if (shouldStopFirst && isFirstPolling) {
+        break;
+      }
+
       yield delay(defaultInterval * 1000);
     }
   }
 }
 
 function* beginPolling(pollingAction) {
-  const { pollingSUrl, defaultInterval = 300, mockInterval, types, params = {} } = pollingAction;
+  const {
+    pollingSUrl, defaultInterval = 300, mockInterval, types, params = {},
+    shouldStopFirst = false,
+  } = pollingAction;
 
   if (!types[1]) {
     throw Error('pollingAction types[1] is null', pollingAction);
@@ -142,6 +151,7 @@ function* beginPolling(pollingAction) {
     params,
     mockInterval,
     defaultInterval,
+    shouldStopFirst,
   };
 
   const pollingTaskId = yield fork(pollingSaga, fetchAction);
