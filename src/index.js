@@ -121,10 +121,19 @@ function* pollingSaga(fetchAction) {
   while (true) {
     try {
       const result = yield put.sync(fetchAction);
-      isFirstPolling = false;
-      const interval = mockInterval || result.interval;
 
-      yield delay(interval * 1000);
+      if (!result) {
+        if (shouldStopFirst && isFirstPolling) {
+          break;
+        }
+
+        yield delay(defaultInterval * 1000);
+      } else {
+        isFirstPolling = false;
+        const interval = mockInterval || result.interval;
+
+        yield delay(interval * 1000);
+      }
     } catch (e) {
       if (shouldStopFirst && isFirstPolling) {
         break;
