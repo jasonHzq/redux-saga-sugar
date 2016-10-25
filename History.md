@@ -1,3 +1,8 @@
+0.2.7 / 2016-10-25
+==================
+
+* Merge pull request #1 from BlackGanglion/master
+
 0.2.6 / 2016-10-21
 ==================
 
