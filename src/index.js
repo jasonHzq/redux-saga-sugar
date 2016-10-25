@@ -195,7 +195,7 @@ const Sugar = {
         return pollingSUrl && types && types.length;
       }, beginPolling);
     } catch (e) {
-      console.err(e);
+      console.error(e);
     }
   },
   createActions,
