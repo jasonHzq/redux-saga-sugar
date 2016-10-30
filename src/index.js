@@ -45,7 +45,7 @@ function createAction(firstArg) {
       };
 
       actionCreator.toString = () => {
-        return type;
+        return types[1];
       };
     } else if (pollingSUrl) {
       actionCreator = (params = {}, meta) => {
@@ -64,7 +64,7 @@ function createAction(firstArg) {
       };
 
       actionCreator.toString = () => {
-        return type;
+        return types[1];
       };
     } else if (firstArg.type) {
       actionCreator = () => {
