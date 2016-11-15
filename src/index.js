@@ -1,8 +1,20 @@
 import 'babel-polyfill';
 import { fork, call, put, take, select, cancel } from 'redux-saga/effects';
-import { takeEvery, takeLatest, delay } from 'redux-saga';
+import { takeEvery, takeLatest, CANCEL } from 'redux-saga';
 import get from 'lodash/get';
 import mapValues from 'lodash/mapValues';
+import setRafTimeout from 'setRafTimeout';
+
+function rafDelay(ms, val = true) {
+  let timeoutId;
+  const promise = new Promise(resolve => {
+    timeoutId = setTimeout(() => resolve(val), ms);
+  });
+
+  promise[CANCEL] = () => clearTimeout(timeoutId);
+
+  return promise;
+}
 
 function createAction(firstArg) {
   let actionCreator = null;
@@ -139,19 +151,19 @@ function* pollingSaga(fetchAction) {
           break;
         }
 
-        yield delay(defaultInterval * 1000);
+        yield rafDelay(defaultInterval * 1000);
       } else {
         isFirstPolling = false;
         const interval = mockInterval || result.interval;
 
-        yield delay(interval * 1000);
+        yield rafDelay(interval * 1000);
       }
     } catch (e) {
       if (shouldStopFirst && isFirstPolling) {
         break;
       }
 
-      yield delay(defaultInterval * 1000);
+      yield rafDelay(defaultInterval * 1000);
     }
   }
 }
