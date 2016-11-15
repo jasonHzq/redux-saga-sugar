@@ -196,6 +196,7 @@ function* beginPolling(pollingAction) {
 }
 
 const Sugar = {
+  rafDelay,
   get: selectGet,
   createWatch: createWatchGenerator,
   createWatchLatest: createWatchLatestGenerator,
