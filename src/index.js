@@ -3,15 +3,15 @@ import { fork, call, put, take, select, cancel } from 'redux-saga/effects';
 import { takeEvery, takeLatest, CANCEL } from 'redux-saga';
 import get from 'lodash/get';
 import mapValues from 'lodash/mapValues';
-import setRafTimeout from 'setRafTimeout';
+import setRafTimeout, { clearRafTimeout } from 'setRafTimeout';
 
 function rafDelay(ms, val = true) {
   let timeoutId;
   const promise = new Promise(resolve => {
-    timeoutId = setTimeout(() => resolve(val), ms);
+    timeoutId = setRafTimeout(() => resolve(val), ms);
   });
 
-  promise[CANCEL] = () => clearTimeout(timeoutId);
+  promise[CANCEL] = () => clearRafTimeout(timeoutId);
 
   return promise;
 }
