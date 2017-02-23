@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import { fork, call, put, take, select, cancel } from 'redux-saga/effects';
 import { takeEvery, takeLatest, CANCEL } from 'redux-saga';
 import get from 'lodash/get';
