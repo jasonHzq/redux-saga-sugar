@@ -129,6 +129,14 @@ function* defaultGetParams() {
   return {};
 }
 
+function getInterval(mockInterval, result) {
+  if (typeof mockInterval === 'function') {
+    return mockInterval(result);
+  }
+
+  return mockInterval || result.interval;
+}
+
 function* pollingSaga(fetchAction) {
   const { defaultInterval, mockInterval, shouldStopFirst, getParams, params } = fetchAction;
   let isFirstPolling = true;
@@ -153,7 +161,7 @@ function* pollingSaga(fetchAction) {
         yield rafDelay(defaultInterval * 1000);
       } else {
         isFirstPolling = false;
-        const interval = mockInterval || result.interval;
+        const interval = getInterval(mockInterval, result);
 
         yield rafDelay(interval * 1000);
       }
